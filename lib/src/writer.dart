@@ -20,7 +20,7 @@ enum SimulationCommand {
 
 /// VCDWriter is a class that writes VCD file.
 abstract class VCDWriter {
-  VCDWriter({this.nextIDCode = IDCode.first, this.scopeDepth = 0});
+  VCDWriter({required this.nextIDCode, this.scopeDepth = 0});
 
   IDCode nextIDCode;
   int scopeDepth;

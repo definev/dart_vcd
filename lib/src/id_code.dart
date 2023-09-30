@@ -1,3 +1,17 @@
+import 'dart:typed_data';
+
+int checkOverflow(int a) {
+  int maxInt64 = 9223372036854775807;
+  int minInt64 = -9223372036854775808;
+  int b = 1; // You can replace this with the value you want to add
+
+  if ((a > 0 && b > maxInt64 - a) || (a < 0 && b < minInt64 - a)) {
+    throw InvalidIDCode.tooLong;
+  } else {
+    return a;
+  }
+}
+
 /// Parse error for invalid ID code.
 enum InvalidIDCode implements Exception {
   // ID is empty
@@ -11,27 +25,31 @@ enum InvalidIDCode implements Exception {
 /// An ID used within the file to refer to a particular variable.
 final class IDCode {
   const IDCode._({required this.value});
-  factory IDCode(String value) {
+  factory IDCode(Uint8List value) {
     int result = 0;
     if (value.isEmpty) {
       throw InvalidIDCode.empty;
     }
-    final codeUnits = value.codeUnits;
-    for (final codeUnit in codeUnits) {
+    for (final codeUnit in value.reversed) {
       if (codeUnit < idCharMin || codeUnit > idCharMax) {
         throw InvalidIDCode.invalidChar;
       }
-      final c = (codeUnit - idCharMin) + 1;
+      final c = (codeUnit - idCharMin).toUnsigned(64) + 1;
+      result *= idCharRange;
       result += c;
     }
-    return IDCode._(value: result);
+    return IDCode._(value: result - 1);
+  }
+
+  factory IDCode.fromString(String value) {
+    return IDCode(Uint8List.fromList(value.codeUnits));
   }
 
   /// An arbitrary IdCode with a short representation.
-  static const IDCode first = IDCode._(value: 0);
-  static final idCharMin = '!'.codeUnits.first;
-  static final idCharMax = '~'.codeUnits.first;
-  static final idCharRange = idCharMax - idCharMin + 1;
+  static final IDCode first = IDCode.fromString('!'); // '0'
+  static final idCharMin = 33.toUnsigned(8); // '!'
+  static final idCharMax = 126.toUnsigned(8); // '~'
+  static final idCharRange = (idCharMax - idCharMin + 1).toUnsigned(64);
 
   final int value;
 
@@ -48,15 +66,22 @@ final class IDCode {
   @override
   String toString() {
     final codeUnits = <int>[];
-    var v = value;
-    while (v > 0) {
-      final c = (v % idCharRange) + idCharMin - 1;
+    int value = this.value;
+    do {
+      final c = (value % idCharRange) + idCharMin;
       codeUnits.add(c);
-      v ~/= idCharRange;
-    }
-    return String.fromCharCodes(codeUnits.reversed);
+      value ~/= idCharRange;
+      value -= 1;
+    } while (value > -1);
+
+    final str = String.fromCharCodes(codeUnits);
+    return str;
   }
 
   @override
   int get hashCode => Object.hashAll([value]);
+}
+
+extension IDCodeParseString on String {
+  IDCode parse<T>() => IDCode.fromString(this);
 }
