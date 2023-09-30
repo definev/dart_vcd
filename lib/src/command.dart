@@ -1,108 +1,129 @@
-import 'header.dart';
 import 'id_code.dart';
 import 'scope_item/scope_item.dart';
+import 'scope_item/scope_type.dart';
+import 'timescale.dart';
+import 'value.dart';
 import 'writer.dart';
 
 sealed class Command {
   const Command();
 }
 
-class Comment extends Command {
-  const Comment({required this.comment});
+/// A [comment] command
+class CommentCommand extends Command {
+  const CommentCommand({required this.comment});
 
   final String comment;
 }
 
-class Date extends Command {
-  const Date({required this.data});
+/// A [date] command
+class DateCommand extends Command {
+  const DateCommand({required this.date});
 
-  final DateTime data;
+  final String date;
 }
 
-class Version extends Command {
-  const Version({required this.version});
+/// A [version] command
+class VersionCommand extends Command {
+  const VersionCommand({required this.version});
 
   final String version;
 }
 
-class Timescale extends Command {
-  const Timescale({required this.ts, required this.unit});
+/// A [timescale] command
+class TimescaleCommand extends Command {
+  const TimescaleCommand({required this.ts, required this.unit});
 
   final int ts;
   final TimescaleUnit unit;
 }
 
-class ScopeDef extends Command {
-  const ScopeDef({required this.type, required this.i});
+/// A [scope] command
+class ScopeDefCommand extends Command {
+  const ScopeDefCommand({required this.type, required this.i});
 
   final ScopeType type;
   final String i;
 }
 
-class Upscope extends Command {
-  const Upscope();
+/// An [upscope] command
+class UpscopeCommand extends Command {
+  const UpscopeCommand();
 }
 
-class VarDef extends Command {
-  const VarDef({
+/// A [variable] command
+class VariableDefCommand extends Command {
+  const VariableDefCommand({
     required this.type,
     required this.width,
     required this.id,
     required this.reference,
-    this.inde,
+    this.index,
   });
 
   final VariableType type;
   final int width;
   final IDCode id;
   final String reference;
-  final ReferenceIndex? inde;
+  final ReferenceIndex? index;
 }
 
-class Enddefinitions extends Command {
-  const Enddefinitions();
+/// An [enddefinitions] command
+class EnddefinitionsCommand extends Command {
+  const EnddefinitionsCommand();
 }
 
-class Timestamp extends Command {
-  const Timestamp({required this.ts});
+/// A `#xxx` timestamp
+class TimestampCommand extends Command {
+  const TimestampCommand({required this.ts});
 
   final int ts;
 }
 
-class ChangeScalar extends Command {
-  const ChangeScalar({required this.id, required this.value});
+/// A `0a` change to a scalar variable
+class ChangeScalarCommand extends Command {
+  const ChangeScalarCommand({required this.id, required this.value});
 
   final IDCode id;
   final Value value;
 }
 
-class ChangeVector extends Command {
-  const ChangeVector({required this.id, required this.values});
+/// A `b0000 a` change to a vector variable
+class ChangeVectorCommand extends Command {
+  const ChangeVectorCommand({required this.id, required this.values});
 
   final IDCode id;
-  final Iterator<Value> values;
+  final Vector values;
 }
 
-class ChangeReal extends Command {
-  const ChangeReal({required this.id, required this.value});
+/// A `r1.234 a` change to a real variable
+class ChangeRealCommand extends Command {
+  const ChangeRealCommand({required this.id, required this.value});
 
   final IDCode id;
   final double value;
 }
 
-class ChangeString extends Command {
-  const ChangeString({required this.id, required this.value});
+/// A `sSTART a` change to a string variable
+class ChangeStringCommand extends Command {
+  const ChangeStringCommand({required this.id, required this.value});
 
   final IDCode id;
   final String value;
 }
 
-class Begin extends Command {
-  const Begin({required this.command});
+/// A beginning of a simulation command. Unlike header commands, which are parsed atomically,
+/// simulation commands emit a Begin, followed by the data changes within them, followed by
+/// End.
+class BeginCommand extends Command {
+  const BeginCommand({required this.command});
 
   final SimulationCommand command;
 }
 
-class End extends Command {
-  const End();
+/// An end of a simulation command.
+class EndCommand extends Command {
+  const EndCommand({required this.command});
+
+  final SimulationCommand command;
 }
