@@ -24,7 +24,7 @@ enum InvalidIDCode implements Exception {
 
 /// An ID used within the file to refer to a particular variable.
 final class IDCode {
-  const IDCode._({required this.value});
+  const IDCode.raw(this.value);
   factory IDCode(Uint8List value) {
     int result = 0;
     if (value.isEmpty) {
@@ -38,7 +38,7 @@ final class IDCode {
       result *= idCharRange;
       result += c;
     }
-    return IDCode._(value: result - 1);
+    return IDCode.raw(result - 1);
   }
 
   factory IDCode.fromString(String value) {
@@ -54,7 +54,7 @@ final class IDCode {
   final int value;
 
   /// Returns the IdCode following this one in an arbitrary sequence.
-  IDCode next() => IDCode._(value: value + 1);
+  IDCode next() => IDCode.raw(value + 1);
 
   operator <=(IDCode other) => value <= other.value;
   operator >=(IDCode other) => value >= other.value;

@@ -11,7 +11,7 @@ import 'value.dart';
 enum SimulationCommand {
   dumpall,
   dumpoff,
-  duppon,
+  dumpon,
   dumpvars;
 
   @override
@@ -294,7 +294,7 @@ class StringBufferVCDWriter extends VCDWriter {
         DateCommand(:final date) => this.date(date),
         VersionCommand(:final version) => this.version(version),
         TimescaleCommand(:final ts, :final unit) => timescale(ts, unit),
-        ScopeDefCommand(:final type, :final i) => scopeDef(type, i),
+        ScopeDefCommand(:final type, identifier:final i) => scopeDef(type, i),
         UpscopeCommand() => upscope(),
         VariableDefCommand(
           :final type,
