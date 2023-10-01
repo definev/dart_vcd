@@ -25,101 +25,16 @@ abstract class VCDWriter {
   IDCode nextIDCode;
   int scopeDepth;
 
+  void write(String s);
+
+  void writeln(String s) => write('$s\n');
+
+  String get result;
+
   /// Flush the data.
   void flush();
 
   /// Writes a complete header with the fields from a [Header] struct from the parser.
-  void header(Header header);
-
-  /// Writes a [comment] command.
-  void comment(String comment);
-
-  /// Writes a [date] command.
-  void date(String date);
-
-  /// Writes a [version] command.
-  void version(String version);
-
-  /// Writes a [timescale] command.
-  void timescale(int ts, TimescaleUnit unit);
-
-  /// Writes a [scope] command.
-  void scopeDef(ScopeType type, String i);
-
-  /// Writes a [scope] command for a module.
-  ///
-  void addModule(String identifier);
-
-  /// Writes an [upscope] command.
-  void upscope();
-
-  /// Writes a [scope] command, a series of [variable] commands, and an
-  /// [upscope] commands from a [Scope] structure from the parser.
-  void scope(Scope scope);
-
-  /// Writes a [variable] command with a specified id.
-  void variableDef({
-    required VariableType type,
-    required int width,
-    required IDCode id,
-    required String reference,
-    ReferenceIndex? index,
-  });
-
-  /// Writes a [variable] command with the next available ID, returning the assigned ID.
-  IDCode addVariable({
-    required VariableType type,
-    required int width,
-    required String reference,
-    ReferenceIndex? index,
-  });
-
-  /// Adds a [variable] for a wire with the next available ID, returning the assigned ID.
-  void addWire(int width, String reference);
-
-  /// Writes a [variable] command from a [Variable] structure from the parser.
-  void variable(Variable variable);
-
-  /// Writes a [enddefinitions] command to end the header.
-  void enddefinitions();
-
-  /// Writes a `#xxx` timestamp.
-  void timestamp(int ts);
-
-  /// Writes a change to a scalar variable.
-  void changeScalar(IDCode id, Value value);
-
-  /// Writes a change to a vector variable.
-  void changeVector(IDCode id, Vector values);
-
-  /// Writes a change to a real variable.
-  void changeReal(IDCode id, double value);
-
-  /// Writes a change to a string variable.
-  void changeString(IDCode id, String value);
-
-  /// Writes the beginning of a simulation command.
-  void begin(SimulationCommand command);
-
-  /// Writes an [end] to end a simulation command.
-  void end();
-
-  /// Writes a command from a [Command] enum as parsed by the parser.
-  void command(Command command);
-}
-
-class StringBufferVCDWriter extends VCDWriter {
-  StringBufferVCDWriter({IDCode? nextIDCode, int? scopeDepth})
-      : super(nextIDCode: nextIDCode ?? IDCode.first, scopeDepth: scopeDepth ?? 0);
-
-  final StringBuffer _buffer = StringBuffer();
-
-  @override
-  void flush() {
-    _buffer.clear();
-  }
-
-  @override
   void header(Header header) {
     final Header(:date, :items, :timescale, :version) = header;
     if (date != null) this.date(date);
@@ -137,48 +52,49 @@ class StringBufferVCDWriter extends VCDWriter {
     enddefinitions();
   }
 
-  @override
+  /// Writes a [comment] command.
   void comment(String comment) {
-    _buffer.writeln("\$comment\n    $comment\n\$end");
+    writeln("\$comment\n    $comment\n\$end");
   }
 
-  @override
+  /// Writes a [date] command.
   void date(String date) {
-    _buffer.writeln("\$date\n    $date\n\$end");
+    writeln("\$date\n    $date\n\$end");
   }
 
-  @override
+  /// Writes a [version] command.
   void version(String version) {
-    _buffer.writeln("\$version\n    $version\n\$end");
+    writeln("\$version\n    $version\n\$end");
   }
 
-  @override
+  /// Writes a [timescale] command.
   void timescale(int ts, TimescaleUnit unit) {
-    _buffer.writeln("\$timescale $ts $unit \$end");
+    writeln("\$timescale $ts $unit \$end");
   }
 
-  @override
+  /// Writes a [scope] command.
   void scopeDef(ScopeType type, String i) {
     scopeDepth++;
-    _buffer.writeln("\$scope $type $i \$end");
+    writeln("\$scope $type $i \$end");
   }
 
-  @override
+  /// Writes a [scope] command for a module.
   void addModule(String identifier) {
     scopeDef(ScopeType.module, identifier);
   }
 
-  @override
+  /// Writes an [upscope] command.
   void upscope() {
     assert(
       scopeDepth > 0,
       "Generate invalid VCD: upscope without a matching scope",
     );
     scopeDepth--;
-    _buffer.writeln("\$upscope \$end");
+    writeln("\$upscope \$end");
   }
 
-  @override
+  /// Writes a [scope] command, a series of [variable] commands, and an
+  /// [upscope] commands from a [Scope] structure from the parser.
   void scope(Scope scope) {
     scopeDef(scope.type, scope.identifier);
     for (final item in scope.items) {
@@ -191,7 +107,7 @@ class StringBufferVCDWriter extends VCDWriter {
     upscope();
   }
 
-  @override
+  /// Writes a [variable] command with a specified id.
   void variableDef({
     required VariableType type,
     required int width,
@@ -207,12 +123,12 @@ class StringBufferVCDWriter extends VCDWriter {
       nextIDCode = id.next();
     }
     final _ = switch (index) {
-      null => _buffer.writeln("\$var $type $width $id $reference \$end"),
-      final index => _buffer.writeln("\$var $type $width $id $reference $index \$end"),
+      null => writeln("\$var $type $width $id $reference \$end"),
+      final index => writeln("\$var $type $width $id $reference $index \$end"),
     };
   }
 
-  @override
+  /// Writes a [variable] command with the next available ID, returning the assigned ID.
   IDCode addVariable({
     required VariableType type,
     required int width,
@@ -224,12 +140,12 @@ class StringBufferVCDWriter extends VCDWriter {
     return id;
   }
 
-  @override
-  void addWire(int width, String reference) {
-    addVariable(type: VariableType.wire, width: width, reference: reference, index: null);
+  /// Adds a [variable] for a wire with the next available ID, returning the assigned ID.
+  IDCode addWire(int width, String reference) {
+    return addVariable(type: VariableType.wire, width: width, reference: reference, index: null);
   }
 
-  @override
+  /// Writes a [variable] command from a [Variable] structure from the parser.
   void variable(Variable variable) {
     variableDef(
       type: variable.type,
@@ -240,61 +156,61 @@ class StringBufferVCDWriter extends VCDWriter {
     );
   }
 
-  @override
+  /// Writes a [enddefinitions] command to end the header.
   void enddefinitions() {
     assert(
       scopeDepth == 0,
       "Generate invalid VCD: 0 scopes must be closed with upscope before enddefinitions",
     );
-    _buffer.writeln("\$enddefinitions \$end");
+    writeln("\$enddefinitions \$end");
   }
 
-  @override
+  /// Writes a `#xxx` timestamp.
   void timestamp(int ts) {
-    _buffer.writeln("#$ts");
+    writeln("#$ts");
   }
 
-  @override
+  /// Writes a change to a scalar variable.
   void changeScalar(IDCode id, Value value) {
-    _buffer.writeln("$value$id");
+    writeln("$value$id");
   }
 
-  @override
+  /// Writes a change to a vector variable.
   void changeVector(IDCode id, Vector values) {
-    _buffer.writeln("b");
+    writeln("b");
     for (final v in values) {
-      _buffer.write(v.toString());
+      write(v.toString());
     }
-    _buffer.writeln(" $id");
+    writeln(" $id");
   }
 
-  @override
+  /// Writes a change to a real variable.
   void changeReal(IDCode id, double value) {
-    _buffer.writeln("r$value $id");
+    writeln("r$value $id");
   }
 
-  @override
+  /// Writes a change to a string variable.
   void changeString(IDCode id, String value) {
-    _buffer.writeln("s$value $id");
+    writeln("s$value $id");
   }
 
-  @override
+  /// Writes the beginning of a simulation command.
   void begin(SimulationCommand command) {
-    _buffer.writeln("\$$command");
+    writeln("\$$command");
   }
 
-  @override
+  /// Writes an [end] to end a simulation command.
   void end() {
-    _buffer.writeln("\$end");
+    writeln("\$end");
   }
 
-  @override
+  /// Writes a command from a [Command] enum as parsed by the parser.
   void command(Command command) => switch (command) {
         CommentCommand(:final comment) => this.comment(comment),
         DateCommand(:final date) => this.date(date),
         VersionCommand(:final version) => this.version(version),
         TimescaleCommand(:final ts, :final unit) => timescale(ts, unit),
-        ScopeDefCommand(:final type, identifier:final i) => scopeDef(type, i),
+        ScopeDefCommand(:final type, identifier: final i) => scopeDef(type, i),
         UpscopeCommand() => upscope(),
         VariableDefCommand(
           :final type,
@@ -319,4 +235,20 @@ class StringBufferVCDWriter extends VCDWriter {
         BeginCommand(:final command) => begin(command),
         EndCommand() => end(),
       };
+}
+
+class StringBufferVCDWriter extends VCDWriter {
+  StringBufferVCDWriter({IDCode? nextIDCode, int? scopeDepth})
+      : super(nextIDCode: nextIDCode ?? IDCode.first, scopeDepth: scopeDepth ?? 0);
+
+  final StringBuffer _buffer = StringBuffer();
+
+  @override
+  void write(String s) => _buffer.write(s);
+
+  @override
+  void flush() => _buffer.clear();
+
+  @override
+  String get result => _buffer.toString();
 }

@@ -1,15 +1,3 @@
-# dart_vcd
-
-Reads and writes VCD (Value Change Dump) files, a common format used with logic analyzers, HDL simulators, and other EDA tools. It provides streaming wrappers to read and write VCD commands and data.
-
----
-Port of [rust-vcd](https://github.com/kevinmehall/rust-vcd) to Dart.
-
-## Usage
-
-A simple usage example:
-
-```dart
 import 'package:dart_vcd/dart_vcd.dart';
 
 void main() {
@@ -39,4 +27,3 @@ void main() {
 
     print(writer.result);
 }
-```
