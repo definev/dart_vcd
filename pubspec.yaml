@@ -1,6 +1,6 @@
 name: dart_vcd
 description: Read and write VCD (Value Change Dump) files
-version: 1.0.1
+version: 1.0.2
 # repository: https://github.com/definev/dart_vcd
 
 environment:
@@ -8,7 +8,7 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
-  collection: ^1.18.0
+  collection: ^1.17.2
   # path: ^1.8.0
 
 dev_dependencies:
