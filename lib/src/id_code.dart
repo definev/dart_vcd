@@ -62,8 +62,9 @@ final class IDCode {
   operator >=(IDCode other) => value >= other.value;
   operator <(IDCode other) => value < other.value;
   operator >(IDCode other) => value > other.value;
+
   @override
-  operator ==(Object? other) => other is IDCode ? value == other.value : false;
+  operator ==(Object other) => other is IDCode ? value == other.value : false;
 
   @override
   String toString() {
