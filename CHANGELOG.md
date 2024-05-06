@@ -1,3 +1,6 @@
+## 1.0.4
+- Remove 64 bit use 32 bit in web
+
 ## 1.0.3
 - Fix max int64 value in web
 
