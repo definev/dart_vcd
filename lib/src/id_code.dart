@@ -3,8 +3,8 @@ import 'dart:typed_data';
 const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
 
 int checkOverflow(int a) {
-  int maxInt64 = kIsWeb ? 9007199254740991 : 9223372036854775807;
-  int minInt64 = kIsWeb ? 9007199254740992 : -9223372036854775808;
+  int maxInt64 = 9007199254740991;
+  int minInt64 = 9007199254740992;
   int b = 1; // You can replace this with the value you want to add
 
   if ((a > 0 && b > maxInt64 - a) || (a < 0 && b < minInt64 - a)) {
